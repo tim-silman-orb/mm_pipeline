@@ -1,0 +1,32 @@
+schema_version: 1
+source_catalog: ../source_catalog.yml
+
+project:
+  id: respiratory-example
+  timezone: UTC
+
+window:
+  default_lookback_days: 14
+
+sources:
+  - ref: cdc_newsroom
+  - ref: cdc_mmwr
+
+topic_filter:
+  enabled: true
+  mode: literal_any
+  terms:
+    - influenza
+    - respiratory syncytial virus
+    - RSV
+
+extraction:
+  enabled: false
+
+output:
+  backend: local
+  base_uri: output
+
+failure_policy:
+  fail_on_required_source: true
+  fail_on_empty_dataset: false

@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mm-pipeline"
+version = "0.1.0"
+description = "Configuration-driven media monitoring data collection pipeline"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "boto3>=1.35",
+    "beautifulsoup4>=4.12",
+    "feedparser>=6.0",
+    "pydantic>=2.9",
+    "PyYAML>=6.0",
+    "python-dateutil>=2.9",
+    "python-dotenv>=1.0",
+    "requests>=2.32",
+]
+
+[project.optional-dependencies]
+telegram = ["telethon>=1.37"]
+dev = ["jupyterlab>=4.2", "nbclient>=0.10", "pandas>=2.2"]
+
+[project.scripts]
+monitor-pipeline = "mm_pipeline.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

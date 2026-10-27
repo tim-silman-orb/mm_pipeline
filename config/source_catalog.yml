@@ -1,0 +1,84 @@
+schema_version: 1
+
+sources:
+  cdc_newsroom:
+    adapter: rss
+    name: CDC Newsroom
+    platform: health_source
+    url: https://tools.cdc.gov/api/v2/resources/media/403372.rss
+    required: false
+    options:
+      max_items: 80
+      timeout_seconds: 30
+      max_attempts: 3
+
+  cdc_mmwr:
+    adapter: rss
+    name: CDC MMWR
+    platform: health_source
+    url: https://tools.cdc.gov/api/v2/resources/media/342778.rss
+    required: false
+    options:
+      max_items: 300
+
+  cdc_travel_notices:
+    adapter: rss
+    name: CDC Travel Health Notices
+    platform: health_source
+    url: https://tools.cdc.gov/api/v2/resources/media/316422.rss
+    required: false
+    options:
+      max_items: 80
+
+  who_disease_outbreak_news:
+    adapter: html_list
+    name: WHO Disease Outbreak News
+    platform: health_source
+    url: https://www.who.int/emergencies/emergency-events
+    required: true
+    options:
+      item_selector: "a[href*='/emergencies/disease-outbreak-news/item/']"
+      max_items: 100
+      enrich: true
+
+  who_africa:
+    adapter: rss
+    name: WHO Regional Office for Africa
+    platform: health_source
+    url: https://www.afro.who.int/rss.xml
+    required: false
+    options:
+      max_items: 120
+      timeout_seconds: 30
+      max_attempts: 2
+
+  africa_cdc:
+    adapter: rss
+    name: Africa CDC
+    platform: health_source
+    url: https://africacdc.org/feed/
+    required: false
+    options:
+      max_items: 120
+
+  ncdc_press:
+    adapter: html_list
+    name: Nigeria Centre for Disease Control
+    platform: health_source
+    url: https://www.ncdc.gov.ng/news/press
+    required: false
+    options:
+      item_selector: "#news article"
+      max_items: 20
+      enrich: true
+      timeout_seconds: 30
+      max_attempts: 2
+
+  ecdc_news:
+    adapter: rss
+    name: ECDC News
+    platform: health_source
+    url: https://www.ecdc.europa.eu/en/taxonomy/term/1307/feed
+    required: false
+    options:
+      max_items: 100

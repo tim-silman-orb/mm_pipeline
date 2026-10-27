@@ -1,0 +1,89 @@
+schema_version: 1
+source_catalog: ../source_catalog.yml
+
+project:
+  id: ebola
+  timezone: UTC
+
+window:
+  default_lookback_days: 7
+
+sources:
+  - ref: cdc_newsroom
+  - ref: cdc_mmwr
+  - ref: cdc_travel_notices
+  - ref: who_disease_outbreak_news
+  - ref: who_africa
+  - ref: africa_cdc
+  - ref: ncdc_press
+  - ref: ecdc_news
+
+  - id: opoint_news
+    adapter: opoint
+    name: OPoint Ebola stored search
+    platform: opoint
+    required: true
+    options:
+      stored_search_id: 101838198
+      max_items: 25000
+      token_env: OPOINT_TOKEN
+
+  - id: telegram_news
+    adapter: telegram
+    name: Telegram news channels
+    platform: telegram
+    enabled: false
+    required: false
+    options:
+      channels:
+        - nytimes
+        - news_kremlin_eng
+      limit: 100
+      api_id_env: TELEGRAM_API_ID
+      api_hash_env: TELEGRAM_API_HASH
+      session_env: TELEGRAM_SESSION_STRING
+
+  - id: x_ebola
+    adapter: x
+    name: X Ebola search
+    platform: x
+    enabled: false
+    required: false
+    options:
+      query: Ebola
+      max_results: 100
+      bearer_token_env: X_BEARER_TOKEN
+
+topic_filter:
+  enabled: true
+  mode: literal_any
+  fields:
+    - headline
+    - content
+    - summary
+  apply_to_platforms:
+    - health_source
+  terms:
+    - ebola
+    - ebola virus disease
+    - bundibugyo
+    - viral haemorrhagic fever
+    - viral hemorrhagic fever
+    - democratic republic of the congo
+    - drc
+    - kivu
+
+extraction:
+  enabled: false
+  provider: bedrock
+  model_id: amazon.nova-lite-v1:0
+  max_article_characters: 30000
+  max_retries: 4
+
+output:
+  backend: local
+  base_uri: output
+
+failure_policy:
+  fail_on_required_source: true
+  fail_on_empty_dataset: true
