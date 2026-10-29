@@ -1,0 +1,106 @@
+schema_version: 1
+project: ebola
+
+# Resolved relative to this YAML file. The parent is the standalone repository root.
+project_root: ..
+
+# A local path is resolved from project_root. An s3:// URI makes each stage
+# download the workspace at startup and upload it when the stage completes.
+artifact_uri: created_project_data
+
+aws:
+  region: eu-west-2
+  # Leave blank on ECS so boto3 uses the task role. Locally this can be supplied
+  # through AWS_PROFILE without changing the YAML.
+  profile_env: AWS_PROFILE
+
+sources:
+  opoint:
+    enabled: true
+    token_env: TOKEN
+    stored_search_id_env: OPOINT_STORED_SEARCH_ID
+    stored_search_id: 101838198
+    max_items: 25000
+
+  health:
+    enabled: true
+    # live reproduces src.test_ingestion inside the collection stage.
+    # file reads the existing health_items.jsonl instead.
+    mode: live
+    source_config: config/sources.yml
+    enrich: true
+
+  telegram:
+    enabled: false
+    api_id_env: API_ID
+    api_hash_env: API_HASH
+    session_env: SESSION_STRING
+    channels: [nytimes, news_kremlin_eng]
+    limit: 100
+
+  x:
+    enabled: false
+    bearer_token_env: X_BEARER_TOKEN
+    query: Ebola
+    max_results: 10
+
+topic_filter:
+  platforms: [health_source]
+  fields: [headline, content, summary]
+  terms:
+    - ebola
+    - ebola virus
+    - ebola disease
+    - drc
+    - democratic republic of the congo
+    - congo
+    - kivu
+    - north kivu
+    - south kivu
+    - ituri
+    - kasai
+    - uganda
+    - marburg
+    - viral haemorrhagic fever
+    - viral hemorrhagic fever
+
+extraction:
+  master_data_file: master_data.jsonl
+  extraction_file: extraction/extracted_developments.csv
+  article_log_file: extraction/development_article_log.csv
+  model_id_env: EXTRACTION_MODEL_ID
+  model_id: amazon.nova-lite-v1:0
+  max_article_characters: 30000
+  request_delay_seconds: 0.5
+  max_retries: 4
+
+clustering:
+  extracted_input_file: extraction/extracted_developments.csv
+  output_dir: clustering/streams
+  grouping_model_id_env: GROUPING_MODEL_ID
+  grouping_model_id: amazon.nova-lite-v1:0
+  embedding_model_id_env: EMBEDDING_MODEL_ID
+  embedding_model_id: amazon.titan-embed-text-v2:0
+  embedding_distance_threshold: 0.25
+  max_llm_cluster_size: 25
+  max_retries: 4
+  request_delay_seconds: 0.5
+  embedding_request_delay_seconds: 0.05
+  embedding_dimensions: 1024
+  streams:
+    news:
+      enabled: true
+    social:
+      enabled: false
+    public_health:
+      enabled: true
+
+  cleanup:
+    enabled: true
+    streams: [news]
+    model_id_env: CLEANUP_MODEL_ID
+    # Blank means use the grouping model.
+    model_id: ""
+    candidate_distance: 0.40
+    max_batch_size: 30
+    passes: 2
